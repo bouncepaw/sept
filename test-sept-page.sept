@@ -1,0 +1,13 @@
+(html
+  (head
+    (title "Example page")
+    (style ".heading {color: red}"))
+  (body
+    ("h1 class='heading'" "This is an element with attribute")
+    (table
+      (tr
+        (th "Column 1")
+        (th "Column 2"))
+      (tr
+        (td "Column 1")
+        (td "Column 2")))))
