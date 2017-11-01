@@ -84,6 +84,17 @@ module Sept
 
     $html
   end
+
+  # Recursive function that replaces every `$param` in `node` with
+  # corresponding value
+  # `regex` is formed like that: `Regex.new('(' + params.keys.join('|') + ')')`
+  def Sept.parse_params(node, params)
+    # Adding dollars to param names
+    # Is this a workaround, or not? :thinking:
+    params.keys.each { |key| params["$#{key}"] = params.delete(key) }
+    regex = Regex.new('(' + params.keys.join('|') + ')')
+    node.gsub(regex, node)
+  end
 end
 
 Sept.run
