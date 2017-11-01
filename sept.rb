@@ -47,7 +47,10 @@ module Sept
     pp file
 
     new_filename = filename[0..-6] + ".html"
-    new_file = Sept.to_html Sept.to_s SXP.read file
+    new_file = Sept.parse_params(
+      Sept.to_html(Sept.to_s(SXP.read(file))),
+      { :param1 => 'This is first param', :param2 => 'And the second' })
+
     File.new new_filename, "w+" unless File.file? new_filename
     File.write new_filename, new_file
     print "SEPT: ".yellow, "parsed #{filename} and saved in #{new_filename}:\n"
@@ -88,12 +91,10 @@ module Sept
   # Recursive function that replaces every `$param` in `node` with
   # corresponding value
   # `regex` is formed like that: `Regex.new('(' + params.keys.join('|') + ')')`
-  def Sept.parse_params(node, params)
-    # Adding dollars to param names
+  def Sept.parse_params(page, params)
+    # Adding mustaches to param names
     # Is this a workaround, or not? :thinking:
-    params.keys.each { |key| params["$#{key}"] = params.delete(key) }
-    regex = Regex.new('(' + params.keys.join('|') + ')')
-    node.gsub(regex, node)
+    page % params
   end
 end
 
