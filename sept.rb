@@ -19,83 +19,84 @@ require 'pp'
 #         (td 0%))
 #       (tr
 #         (td SEPT)
-#         (td 100%)))))
-module Sept
+#         (td %{param})))))
+class Sept
 
-  # Main function
-  def Sept.run
-    if ARGV.length == 0 then puts 'SEPT:'.red, "Too few arguments"
-    elsif ARGV[0] == "-h"
-      puts "SEPT HTML".yellow,
-        'S-Expression Powered Template HyperText Markup Language'
-    else ARGV.each { |f| cook f }
-    end
-    exit
+  def initialize(params)
+    @params = params
+    @html = ''
   end
 
-  # Function that 'cooks' passed file. It logs some info
-  def Sept.cook(filename)
-    $html = '' # i know this is bad technique, but it solves my problems
+
+  # Function that 'cooks' passed file. It logs some info. The name is bad
+  def self.cook(filename)
     unless File.extname(filename) == ".sept"
-      print "SEPT: ".red, "SEPT files must end with `.sept` extension, ",
+      print "HEY! ".red, "SEPT files must end with `.sept` extension, ",
         "so can't parse `#{filename}`\n"
       return
     end
+    @html = ''
 
     file = File.read filename
-    print "SEPT: ".yellow, "got #{filename}, its content is:\n"
-    pp file
+    puts "got #{filename}, its content is: #{file}"
 
     new_filename = filename[0..-6] + ".html"
-    new_file = Sept.parse_params(
-      Sept.to_html(Sept.to_s(SXP.read(file))),
-      { :param1 => 'This is first param', :param2 => 'And the second' })
+    new_file = self.to_html(self.to_s(SXP.read(file))) % @params,
 
+    # Create file if it does not exist yet
     File.new new_filename, "w+" unless File.file? new_filename
     File.write new_filename, new_file
-    print "SEPT: ".yellow, "parsed #{filename} and saved in #{new_filename}:\n"
-    pp new_file
+    puts "parsed #{filename} and saved in #{new_filename}: #{new_file}"
   end
 
   # Recursive function that turns everything in `node` to a string
-  # This workaround is needed because of how the sxp parser works
-  def Sept.to_s(node)
+  # [:sym, [1, "str"]] => ["sym", ["1", "str"]]
+  def self.to_s(node)
     node.each_with_index do |sub, i|
-      case sub
-      when Numeric, Symbol then node[i] = sub.to_s
-      when Array then Sept.to_s sub
-      end
+      # Is it hacker-ish?
+      sub.is_a?(Array) ? self.to_s(sub) : node[i] = sub.to_s
     end
   end
 
   # Function that turns array to something usable
-  def Sept.to_html(node)
-    # in a nutshell, sept-expressed tag is like that:
-    # ("tagname and attributes" children...)
-    # `children` can be either strings or tags
-
+  def self.to_html(node)
     if node.is_a? Array
-      if node.length == 1 then $html << "<#{node[0]}/>"
+      if node.length == 1 then @html << "<#{node[0]}/>"
       else
-        $html << "<#{node[0]}>"
-        node[1..-1].each { |e| Sept.to_html e }
-        $html << "</#{node[0].split(' ')[0]}>"
+        @html << "<#{node[0]}>"
+        node[1..-1].each { |e| self.to_html e }
+        @html << "</#{node[0].split(' ')[0]}>"
       end
     else
-      $html << node
+      @html << node
     end
 
-    $html
-  end
-
-  # Recursive function that replaces every `$param` in `node` with
-  # corresponding value
-  # `regex` is formed like that: `Regex.new('(' + params.keys.join('|') + ')')`
-  def Sept.parse_params(page, params)
-    # Adding mustaches to param names
-    # Is this a workaround, or not? :thinking:
-    page % params
+    @html
   end
 end
 
-Sept.run
+if ARGV.length == 0
+  puts 'SEPT:'.red, "Too few arguments"
+else case ARGV[0]
+when "-h" # help
+  puts 'S-Expression Powered Template HyperText Markup Language',
+    'To get version, run `sept -v`',
+    'To pass some data, run `sept -d <data> files...`',
+    '<data> is a ruby hash ({:key => "value",})',
+    'To pass some data via file, run `sept -f <datafile> files...`',
+    '<datafile> is a file with ruby hash',
+    'Be careful! Any ruby code can be passed along with hash,',
+    'validation coming soon'
+when "-v" # version
+  puts "SEPT HTML version 1.1.1"
+when "-d" # data
+  sept = Sept.new(eval ARGV[1])
+  ARGV[2..-1].each { |f| sept.cook f }
+when '-f' # file
+  sept = Sept.new(eval File.read ARGV[1])
+  ARGV[2..-1].each { |f| sept.cook f }
+else
+  sept = Sept.new({})
+  ARGV.each { |f| sept.cook f }
+end
+end
