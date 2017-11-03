@@ -26,6 +26,9 @@ class Sept
     files_to_parse.each { |f| self.cook f }
   end
 
+  def generate(file)
+    self.to_html(self.prepare(SXP.read(file))) % @params
+  end
 
   # Function that 'cooks' passed file. It logs some info. The name is bad
   def cook(filename)
@@ -39,7 +42,7 @@ class Sept
     puts "got #{filename}, its content is:\n#{file}"
 
     new_filename = filename[0..-6] + ".html"
-    new_file = self.to_html(self.to_s(SXP.read(file))) % @params
+    new_file = self.generate file
 
     # Create file if it does not exist yet
     File.new new_filename, 'w+' unless File.file? new_filename
@@ -49,10 +52,18 @@ class Sept
 
   # Recursive function that turns everything in `node` to a string
   # [:sym, [1, "str"]] => ["sym", ["1", "str"]]
-  def to_s(node)
+  def prepare(node)
     node.each_with_index do |sub, i|
-      # Is it hacker-ish?
-      sub.is_a?(Array) ? self.to_s(sub) : node[i] = sub.to_s
+      if sub.is_a? Array
+        self.prepare sub
+      else
+        node[i] = sub.to_s
+        if node[0] == "#include"
+          file = self.generate File.read node[1].to_s
+          node.pop until node.length == 0
+          node[0] = file
+        end
+      end
     end
   end
 
@@ -70,6 +81,12 @@ class Sept
 
     @html
   end
+
+  # Function that includes other files
+  # (#include file.sept) => contents of file.sept
+  def include_files(file)
+
+  end
 end
 
 ARGV.length == 0 ? puts("Too few arguments".red) : case ARGV[0]
@@ -83,7 +100,7 @@ when "-h" # help
     'Be careful! Any ruby code can be passed along with hash,',
     'validation coming soon'
 when "-v" # version
-  puts "SEPT HTML version 1.1.1"
+  puts "SEPT HTML version 1.2"
 when "-d" # data
   puts "Passed data as argument"
   sept = Sept.new(eval(ARGV[1]), ARGV[2..-1])
