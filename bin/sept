@@ -17,13 +17,13 @@ else
       'validation coming soon'
   when "-v" # version
     # TODO: fetch version from sept.gemspec automatically
-    puts "SEPT HTML version 1.2.2"
+    puts "SEPT HTML version 1.3.0"
   when "-d" # data
-    # TODO: `eval` is bad, add validation or something like that
-    #       maybe json?
+    # TODO: replace this with json
     puts "Passed data as argument"
     sept = Sept.new(eval(ARGV[1]), ARGV[2..-1])
   when '-f' # file
+    # TODO: replace this with json
     puts "Passed data as file"
     sept = Sept.new(eval(File.read ARGV[1]), ARGV[2..-1])
   else

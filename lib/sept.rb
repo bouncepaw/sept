@@ -23,7 +23,7 @@
 # - https://github.com/bouncepaw/sept
 class Sept
 
-  # Constructor
+  # Constructor. The only method you would need
   #
   # @param params [Hash] Hash with parameters. Keys are symbols, values are strings.
   # @params files_to_parse [Array] List of files program will try to parse
@@ -34,12 +34,12 @@ class Sept
     files_to_parse.each { |f| self.cook f }
   end
 
-  # Method that generates ready HTML file from Sept file
+  # Method that chains lots of methods
   #
   # @param file [String] Sept file
   # @return [String] HTML file
   def generate(file)
-    self.to_html(self.prepare(SXP.read(file))) % @params
+    self.to_html(self.prepare SXP.read file) % @params
   end
 
   # Function that 'cooks' passed file. It logs some info. The name is bad
@@ -47,13 +47,13 @@ class Sept
   # @param filename [String] Name of file to 'cook'
   def cook(filename)
     unless File.extname(filename) == ".sept"
-      puts "#{filename} is not `.sept` file, so can't parse it!".red
+      puts "ERROR #{filename} is not `.sept` file, so can't parse it!".red
       return
     end
     @html = ''
 
     file = File.read filename
-    puts "got #{filename}, its content is:\n#{file}"
+    puts "Got #{filename}, its content is:\n#{file}"
 
     new_filename = filename[0..-6] + ".html"
     new_file = self.generate file
@@ -61,11 +61,10 @@ class Sept
     # Create file if it does not exist yet
     File.new new_filename, 'w+' unless File.file? new_filename
     File.write new_filename, new_file
-    puts "parsed #{filename} and saved in #{new_filename}:\n #{new_file}"
+    puts "Parsed #{filename} and saved in #{new_filename}:\n #{new_file}"
   end
 
-  # Recursive function that turns everything in `node` to a string and handles
-  # including of other files (well, will handle)
+  # Recursive function that turns everything in `node` to a string
   #
   # @param node [Array, String] A Sept node
   def prepare(node)
@@ -74,29 +73,31 @@ class Sept
         self.prepare sub
       else
         node[i] = sub.to_s
-        # TODO: finish this thing
-        if node[0] == "#include"
-          file = self.generate File.read node[1].to_s
-          node.pop until node.length == 0
-          node[0] = file
-        end
       end
     end
   end
 
-  # Recursive function that generates HTML string.
+  # Recursive function that generates HTML string and handles `#include`
   #
   # @param node [Array, String] A Sept node
   # @return [String]
   def to_html(node)
     if node.is_a? Array
-      if node.length == 1 then @html << "<#{node[0]}/>"
+      if node.length == 1
+        @html << "<#{node[0]}/>"
       else
-        @html << "<#{node[0]}>"
-        node[1..-1].each { |e| self.to_html e }
-        @html << "</#{node[0].split(' ')[0]}>"
+        if node[0] == "#include"
+          file = self.generate File.read node[1].to_s
+          node = []
+          node[0] = file
+        else
+          @html << "<#{node[0]}>"
+          node[1..-1].each { |e| self.to_html e }
+          @html << "</#{node[0].split(' ')[0]}>"
+        end
       end
-    else @html << node
+    else
+      @html << node
     end
 
     @html

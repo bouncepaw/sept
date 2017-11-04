@@ -41,7 +41,7 @@ There are several arguments you can pass.
 ## TODOs:
 I don't promise anything, but I want to implement following:
 - [x] Parametets
-- [ ] #include directive (WIP)
+- [x] `#include` directive
 - [x] Gem
 - [ ] Support of this notation: `tag.class1.class2#id otherAttribute=''`
 - [ ] S-Expression CSS
