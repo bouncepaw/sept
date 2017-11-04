@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+%w(sept colorize).each { |f| require f }
+
+if ARGV.length == 0
+  puts "Too few arguments".red
+else
+  case ARGV[0]
+  when "-h" # help
+    puts 'S-Expression Powered Template HyperText Markup Language',
+      'To get version, run `sept -v`',
+      'To pass some data, run `sept -d <data> files...`',
+      '<data> is a ruby hash ({:key => "value",})',
+      'To pass some data via file, run `sept -f <datafile> files...`',
+      '<datafile> is a file with ruby hash',
+      'Be careful! Any ruby code can be passed along with hash,',
+      'validation coming soon'
+  when "-v" # version
+    # TODO: make it possible to fetch version from sept.gemspec
+    puts "SEPT HTML version 1.2.1"
+  when "-d" # data
+    # TODO: `eval` is bad, add validation or something like that
+    puts "Passed data as argument"
+    sept = Sept.new(eval(ARGV[1]), ARGV[2..-1])
+  when '-f' # file
+    puts "Passed data as file"
+    sept = Sept.new(eval(File.read ARGV[1]), ARGV[2..-1])
+  else
+    puts "No passed data"
+    sept = Sept.new({}, ARGV)
+  end
+end
