@@ -1,9 +1,14 @@
 # SEPT HTML (WIP)
+[![Gem Version](https://badge.fury.io/rb/sept.svg)](https://badge.fury.io/rb/sept)
 S-Expression Powered Template HyperText Markup Language.
 
 ## How to use it?
-1. Install `sept`. For now, copy some files from this repo and make your own magic. Gem coming soon.
-2. Learn syntax by one example.
+Run:
+```sh
+gem install sept
+```
+
+Make a `.sept` file:
 ```lisp
 (html
   (head
@@ -12,17 +17,36 @@ S-Expression Powered Template HyperText Markup Language.
   (body
     ("p class='class'" "Note that if a tag has attributes, they are expressed this way")
     (p Cool?)
-    (p "This is #{param}")))
+    (p "This is %{param}")))
 ```
-3. Create some `.sept` files. Then run `ruby path/to/sept.rb file1.sept file2.sept`. `.html` will be generated in the same directory.
 
-Of course, you can run Sept directly from Ruby programs. `Sept.cook("file.sept")` is what you need. Don't forget to require `Sept` module. For better understanding of this program, you can read contents of `sept.rb`.
+In the directory where the file is, run:
+```sh
+sept -d {:param=>"Parameter"} file.sept
+```
 
-## Coming soon
+`file.html` will be generated.
+
+## CLI arguments
+There are several arguments you can pass.
+- `-h`: displays help
+  `sept -h`
+- `-v`: displays version
+  `sept -v`
+- `-d`: you can pass data for parameters, like in example above
+  `sept -d {:this_is=>"ruby hash"} file1 file2...`
+- `-f`: same like argument above, but hash is stored in file
+  `sept -f hashfile file1 file2...`
+
+## TODOs:
 I don't promise anything, but I want to implement following:
-- Gem (so you can use it very easily)
-- Support of this notation: `tag.class1.class2#id otherAttribute=''`
-- S-Expression CSS
+- [x] Parametets
+- [ ] #include directive (WIP)
+- [x] Gem
+- [ ] Support of this notation: `tag.class1.class2#id otherAttribute=''`
+- [ ] S-Expression CSS
 
 ## Contributing
+Please report all the bugs!
 Fork -> commit -> pull request
+

@@ -3,7 +3,7 @@
 %w(sept colorize).each { |f| require f }
 
 if ARGV.length == 0
-  puts "Too few arguments".red
+  puts "ERROR No arguments passed!".red
 else
   case ARGV[0]
   when "-h" # help
@@ -16,10 +16,11 @@ else
       'Be careful! Any ruby code can be passed along with hash,',
       'validation coming soon'
   when "-v" # version
-    # TODO: make it possible to fetch version from sept.gemspec
-    puts "SEPT HTML version 1.2.1"
+    # TODO: fetch version from sept.gemspec automatically
+    puts "SEPT HTML version 1.2.2"
   when "-d" # data
     # TODO: `eval` is bad, add validation or something like that
+    #       maybe json?
     puts "Passed data as argument"
     sept = Sept.new(eval(ARGV[1]), ARGV[2..-1])
   when '-f' # file
