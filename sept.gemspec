@@ -1,28 +1,20 @@
 Gem::Specification.new do |s|
   s.name        = 'sept'
-  s.version     = '1.3.0'
+  s.version     = '1.4.0'
   s.date        = '2017-10-04'
   s.summary     = 'HTML templates as S-Expressions'
   s.description = <<-DESC
     Write your HTML pages like Lisp code. Support of included files,
-    parameters. CLI utility provided.
+    parameters. CLI utility provided. Run `sept -h` for more info
 
-    Example:
-    ```
     (html
       (head
         (title "Hello world")
-        (style ".class { color: blue }"))
+        (style ".red { color: blue }"))
       (body
-        ("p class='class'" "Note that if a tag has attributes, they are expressed this way")
-        (p Cool?)
+        (p.red#cool-and-good "Handy classes and ids. Id must be last")
+        ("p onclick='func()'" "Other attributes are expressed that way")
         (p "This is %{param}")))
-    ```
-
-		Then run:
-		```
-		sept -d '{:param=>"Parameter"}' file.sept
-		```
   DESC
   s.authors     = ['Timur Ismagilov']
   s.email       = 'bouncepaw2@ya.ru'

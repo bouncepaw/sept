@@ -1,4 +1,4 @@
-%w(sxp colorize).each { |f| require f }
+%w(sxp colorize json).each { |f| require f }
 
 # Markup as it should have been
 # Write your page as s-expression structure
@@ -25,10 +25,10 @@ class Sept
 
   # Constructor. The only method you would need
   #
-  # @param params [Hash] Hash with parameters. Keys are symbols, values are strings.
+  # @param params [Hash] Hash with parameters.
   # @params files_to_parse [Array] List of files program will try to parse
   def initialize(params, files_to_parse)
-    @params = params
+    @params = params.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
     @html = ''
 
     files_to_parse.each { |f| self.cook f }
@@ -91,9 +91,10 @@ class Sept
           node = []
           node[0] = file
         else
-          @html << "<#{node[0]}>"
+          temp = self.unfold_tag node[0]
+          @html << "<#{temp}>"
           node[1..-1].each { |e| self.to_html e }
-          @html << "</#{node[0].split(' ')[0]}>"
+          @html << "</#{temp.split(' ')[0]}>"
         end
       end
     else
@@ -101,6 +102,40 @@ class Sept
     end
 
     @html
+  end
+
+  # Function that unfolds dot-notation and hash-notation
+  # p.class.class-to#id onclick="..."
+  # 'p class="class class-too" id="id" onclick="..."'
+  # #id must be after .classes
+  #
+  # @param tag [String] String like `tag.class.class2#id other-arg=""`
+  # @return [String] Unfolded tag
+  def unfold_tag(tag)
+    halves = tag.split(' ')
+    half = halves[0]
+
+    id = ''
+    if half.include? '#'
+      temp = half.split('#')
+      id = temp[-1]
+      half = temp[0..-2].join('')
+    end
+
+    klass = ''
+    if half.include? '.'
+      temp = half.split('.')
+      klass = temp[1..-1].join(' ')
+      half = temp[0]
+    end
+
+    tag_name = half
+    ret = tag_name
+    ret << " class='#{klass}'" unless klass.empty?
+    ret << " id='#{id}'" unless id.empty?
+    ret << " #{halves[1]}" unless halves[1].nil?
+
+    ret
   end
 end
 

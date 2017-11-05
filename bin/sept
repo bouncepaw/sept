@@ -1,31 +1,59 @@
 #!/usr/bin/env ruby
 
-%w(sept colorize).each { |f| require f }
+%w(sept colorize json).each { |f| require f }
 
 if ARGV.length == 0
   puts "ERROR No arguments passed!".red
 else
   case ARGV[0]
-  when "-h" # help
-    puts 'S-Expression Powered Template HyperText Markup Language',
-      'To get version, run `sept -v`',
-      'To pass some data, run `sept -d <data> files...`',
-      '<data> is a ruby hash ({:key => "value",})',
-      'To pass some data via file, run `sept -f <datafile> files...`',
-      '<datafile> is a file with ruby hash',
-      'Be careful! Any ruby code can be passed along with hash,',
-      'validation coming soon'
-  when "-v" # version
+  when '-h', '--help' # help
+    puts <<-TEXT
+    S-Expression Powered Template HyperText Markup Language
+
+    EXAMPLE
+      test.sept:
+      (html
+        (head
+          (title Example)
+          (style ".heading { color: red }"))
+        (body
+          ("h1 class='heading'" Example)
+          (p %{param})))
+
+      After running `sept -d {"param":"Paragraph"} test.sept` you will get
+      test.html file:
+      <html>
+        <head>
+          <title>Example</title>
+          <style>.heading { color: red }</style>
+        </head>
+        <body>
+          <h1 class="heading">Example</h1>
+          <p>Paragraph</p>
+        </body>
+      </html>
+
+    SHELL ARGUMENTS
+      sept -v, sept --version
+        Prints version and exits.
+      sept -h, sept --help
+        Prints this message and exit.
+      sept -d <data> <files>, sept --data <data> <files>
+        You pass JSON hash to <data> for parser to use as parameters.
+        <files> are filenames of files.
+      sept -f <json file> <files>, sept --file <json file> <files>
+        Same as above, but instead of JSON hash, you pass name name of the file
+        with JSON hash.
+    TEXT
+  when '-v', '--version'
     # TODO: fetch version from sept.gemspec automatically
-    puts "SEPT HTML version 1.3.0"
-  when "-d" # data
-    # TODO: replace this with json
+    puts "SEPT HTML version 1.4.0"
+  when '-d', '--data'
     puts "Passed data as argument"
-    sept = Sept.new(eval(ARGV[1]), ARGV[2..-1])
-  when '-f' # file
-    # TODO: replace this with json
+    sept = Sept.new JSON.parse(ARGV[1]), ARGV[2..-1]
+  when '-f', '-file'
     puts "Passed data as file"
-    sept = Sept.new(eval(File.read ARGV[1]), ARGV[2..-1])
+    sept = Sept.new JSON.parse(File.read ARGV[1]), ARGV[2..-1]
   else
     puts "No passed data"
     sept = Sept.new({}, ARGV)
