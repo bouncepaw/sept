@@ -1,1 +1,1 @@
-{:param1=>"param 1",:param2=>"param 2",:param=>"just param"}
+{"param1":"param 1","param2":"param 2","param":"just param"}

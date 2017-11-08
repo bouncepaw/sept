@@ -39,17 +39,13 @@ class Sept
   # @param file [String] Sept file
   # @return [String] HTML file
   def generate(file)
-    self.to_html(self.prepare SXP.read file) % @params
+    self.to_html self.prepare SXP.read file % @params
   end
 
   # Function that 'cooks' passed file. It logs some info. The name is bad
   #
   # @param filename [String] Name of file to 'cook'
   def cook(filename)
-    unless File.extname(filename) == ".sept"
-      puts "ERROR #{filename} is not `.sept` file, so can't parse it!".red
-      return
-    end
     @html = ''
 
     file = File.read filename
