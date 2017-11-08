@@ -1,0 +1,41 @@
+# TODO: make cool man page
+# TODO: copy the man page here
+S-Expression Powered Template HyperText Markup Language
+This program parses both SeptHTML and SeptCSS.
+SeptHTML files have `.septh` extension, SeptCSS have `.septc`
+More info at https://github.com/bouncepaw/sept
+
+EXAMPLE
+  test.septh:
+  (html
+    (head
+      (title Example)
+        (style ".heading { color: red }"))
+    (body
+       (h1.heading Example)
+       (p %{param})))
+
+  After running `sept -d {"param":"Paragraph"} test.septh` you will get
+  test.html file:
+  <html>
+    <head>
+      <title>Example</title>
+      <style>.heading { color: red }</style>
+    </head>
+    <body>
+      <h1 class="heading">Example</h1>
+      <p>Paragraph</p>
+    </body>
+  </html>
+
+SHELL ARGUMENTS
+  sept -v, sept --version
+    Prints version and exits.
+  sept -h, sept --help
+    Prints this message and exit.
+  sept -d <data> <files>, sept --data <data> <files>
+    You pass JSON hash to <data> for parser to use as parameters.
+    <files> are filenames of files.
+  sept -f <json file> <files>, sept --file <json file> <files>
+    Same as above, but instead of JSON hash, you pass name name of the file
+    with JSON hash.

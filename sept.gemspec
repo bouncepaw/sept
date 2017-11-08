@@ -1,11 +1,10 @@
 Gem::Specification.new do |s|
   s.name        = 'sept'
-  s.version     = '1.4.1'
+  s.version     = '1.4.2'
   s.date        = '2017-10-08'
   s.summary     = 'HTML templates as S-Expressions'
   s.description = <<-DESC
-    Write your HTML pages like Lisp code. Support of included files,
-    parameters. CLI utility provided. Run `sept -h` for more info
+    Write your HTML pages like Lisp code. CLI utility. Run `sept -h` for info
 
     (html
       (head

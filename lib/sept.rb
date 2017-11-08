@@ -28,7 +28,7 @@ class Sept
   # @param params [Hash] Hash with parameters.
   # @params files_to_parse [Array] List of files program will try to parse
   def initialize(params, files_to_parse)
-    @params = params.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+    @params = params
     @html = ''
 
     files_to_parse.each { |f| self.cook f }
@@ -49,24 +49,24 @@ class Sept
     @html = ''
 
     file = File.read filename
-    puts "Got #{filename}, its content is:\n#{file}"
+    puts "Got #{filename}:\n#{file}"
 
-    new_filename = filename[0..-6] + ".html"
-    new_file = self.generate file
+    filename = filename[0..-5] + 'html'
+    file = self.generate file
 
     # Create file if it does not exist yet
-    File.new new_filename, 'w+' unless File.file? new_filename
-    File.write new_filename, new_file
-    puts "Parsed #{filename} and saved in #{new_filename}:\n #{new_file}"
+    File.new filename, 'w+' unless File.file? filename
+    File.write filename, file
+    puts "Parsed and saved in #{filename}:\n#{file}"
   end
 
   # Recursive function that turns everything in `node` to a string
   #
   # @param node [Array, String] A Sept node
-  def prepare(node)
+  def self.prepare(node)
     node.each_with_index do |sub, i|
       if sub.is_a? Array
-        self.prepare sub
+        Sept.prepare sub
       else
         node[i] = sub.to_s
       end
@@ -87,7 +87,7 @@ class Sept
           node = []
           node[0] = file
         else
-          temp = self.unfold_tag node[0]
+          temp = Sept.unfold_tag node[0]
           @html << "<#{temp}>"
           node[1..-1].each { |e| self.to_html e }
           @html << "</#{temp.split(' ')[0]}>"
@@ -107,7 +107,7 @@ class Sept
   #
   # @param tag [String] String like `tag.class.class2#id other-arg=""`
   # @return [String] Unfolded tag
-  def unfold_tag(tag)
+  def self.unfold_tag(tag)
     halves = tag.split(' ')
     half = halves[0]
 
@@ -125,8 +125,7 @@ class Sept
       half = temp[0]
     end
 
-    tag_name = half
-    ret = tag_name
+    ret = half
     ret << " class='#{klass}'" unless klass.empty?
     ret << " id='#{id}'" unless id.empty?
     ret << " #{halves[1]}" unless halves[1].nil?
