@@ -1,7 +1,71 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby %w(sept colorize json).each { |f| require f }
+HELP_MESSAGE =<<-END
+S-Expression Powered Template HyperText Markup Language
+Author: Timur Ismagilov <bouncepaw2@ya.ru>
+Repo:   https://github.com/bouncepaw/sept
+DESCRIPTION
+  This program parses SeptHTML — Lisp-inspired abstraction on HTML. Soon it
+  will support SeptCSS too.  SEPT HTML Just like in Lisp, pages are written in
+  parenthesized syntax — S-expressions.  Elements of sexpr are divided by space
+  character. Strings and other sexprs can be nested inside sexpr, except of the
+  first element — it must be string.  HTML tags are expressed by sexpr with at
+  least one element. For example:
+    (br)                 -> <br>
+    (p Hello)            -> <p>Hello</p>
+    (div (p Hello) (br)) -> <div><p>Hello</p><br></div>
 
-%w(sept colorize json).each { |f| require f }
+  If a string contains spaces, it must be surrounded by quotes. There is no
+  difference between double and single quotes. C-style escape sequences
+  are supported, I think. For example:
+    (title "Demo page")   -> <title>Demo page</title>
+    (title 'Demo page')   -> <title>Demo page</title>
+    (title "\"Demo page") -> <title>"Demo page</title>
+    (title Demo page)     -> <title>Demopage</title>
 
+  So, second, third, fourth...last elements are children of the tag. To add
+  attribute to a tag, you need to write them as usual after tag name, but they
+  nust be enclosed by quotes. For example:
+    ("button onclick='buttonPressed()'" "Click this button")
+    -> <button onclick='buttonPressed()'>Click this button</button>
+
+  There is CSS-inspired shortcut for class and id attributes. Multiple classes
+  can be written, but only one id can be used and it must be placed after
+  classes. For example:
+    (p.text "This is text")     -> <p class="text">This is text</p>
+    (p.the#best "This is best") -> <p class="the" id="best">This is best</p>
+    (p.one.two Hey)             -> <p class="one two">Hey</p>
+
+CLI UTILITY
+  After installing `sept` gem, `sept` utility is installed too. This section
+  covers it. Several arguments are understood by the program:
+
+    sept -v, sept --version
+      Prints version and exits.
+
+    sept -h, sept --help
+      Prints this message and exits.
+
+    sept -d <data> <files>, sept --data <data> <files>
+      You pass JSON hash to <data> for parser to use as parameters. You can
+      read more about parameters in the section above. <files> are filenames of
+      files, they must have one of extensions supported by Sept. For example:
+        $ sept -d {"name":"John Smith"} bio.septh not_bio
+        `bio.smith` will be parsed and saved in `bio.html`, `not_bio` will be
+        ignored and error message will be printed.
+
+    sept -f <json file> <files>, sept --file <json file> <files>
+      Same as above, but instead of JSON hash, you pass name of the file with
+      JSON hash. For example:
+        $ cat data
+        {"name":"John Smith"}
+        $ sept -f data bio.septh not_bio
+        `bio.smith` will be parsed and saved in `bio.html`, `not_bio` will be
+        ignored and error message will be printed.
+
+    sept <files>
+      Same as above, but no parameters are passed. If any of the files you
+      passed needs it, error message will be printed and the program will stop.
+END
 def validate_list_of_files(list_of_files)
   correct_ones = []
   list_of_files.each do |file|
@@ -19,7 +83,7 @@ if ARGV.length == 0
 else
   case ARGV[0]
   when '-h', '--help' # help
-    puts File.read 'HELP_MESSAGE'
+    puts HELP_MESSAGE
   when '-v', '--version'
     # TODO: fetch version from sept.gemspec automatically
     puts "SEPT HTML version 1.4.2"

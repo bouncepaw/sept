@@ -1,22 +1,23 @@
-# SEPT HTML (WIP)
+# SEPT (WIP)
 [![Version](https://badge.fury.io/rb/sept.svg)](https://badge.fury.io/rb/sept)
+Gem that supports parsing of SeptHTML — HTML template language written as
+S-expressions, so code looks like Lisp code. At first, it look strangely, but
+once you get used to it, you start to like it.
 
-S-Expression Powered Template HyperText Markup Language.
-
-## How to use it?
-Run:
+## Installation
 ```sh
 gem install sept
 ```
 
-Make a `.sept` file:
+## Creating SeptHTML files
+Make a `.septh` file:
 ```lisp
 (html
   (head
     (title "Hello world")
-    (style ".class { color: blue }"))
+    (style ".red { color: blue }"))
   (body
-    (p.class "Check out this cool CSS notation!")
+    (p.red "Check out this cool CSS notation!")
     (p Cool?)
     (p "This is %{param}")))
 ```
@@ -35,7 +36,7 @@ Run `sept -h` to get more help.
 - [x] `#include` directive
 - [x] Gem
 - [x] Support of CSS notation: `tag.class1.class2#id otherAttribute=''`
-- [ ] S-Expression CSS
+- [ ] SeptCSS (`.septc` extension)
 
 ## Contributing
 Please report all the bugs!
